@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Quote - Machine Management System{% endblock %}
+
+{% block content %}
+<h1>Upload Quote</h1>
+
+<div class="card">
+    <h2>Maintenance Request: {{ maintenance_request.title }}</h2>
+    <p><strong>Machine:</strong> {{ maintenance_request.machine.name }}</p>
+    <p><strong>Type:</strong> {{ maintenance_request.maintenance_type }}</p>
+    <p><strong>Description:</strong> {{ maintenance_request.description }}</p>
+    <p><strong>Estimated Cost:</strong> R{{ "%.2f"|format(maintenance_request.estimated_cost) }}</p>
+</div>
+
+<div class="card">
+    <form method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="vendor">Vendor Name *</label>
+            <input type="text" id="vendor" name="vendor" required placeholder="Name of the vendor/supplier">
+        </div>
+        
+        <div class="form-group">
+            <label for="amount">Quote Amount (R) *</label>
+            <input type="number" id="amount" name="amount" step="0.01" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="file">Quote Document *</label>
+            <input type="file" id="file" name="file" required accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+            <small style="display: block; margin-top: 0.5rem; color: #7f8c8d;">
+                Accepted formats: PDF, Word documents, Images (max 16MB)
+            </small>
+        </div>
+        
+        <button type="submit" class="btn btn-success">Upload Quote</button>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-danger">Cancel</a>
+    </form>
+</div>
+{% endblock %}

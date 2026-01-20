@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Reports - Machine Management System{% endblock %}
+
+{% block content %}
+<h1>Cost Reports & Analytics</h1>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>R{{ "%.2f"|format(total_maintenance) }}</h3>
+        <p>Total Maintenance Costs</p>
+    </div>
+    <div class="stat-card">
+        <h3>R{{ "%.2f"|format(total_downtime) }}</h3>
+        <p>Total Downtime Costs</p>
+    </div>
+    <div class="stat-card">
+        <h3>R{{ "%.2f"|format(total_costs) }}</h3>
+        <p>Total Operating Costs</p>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Cost Breakdown by Machine</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Machine</th>
+                <th>Model</th>
+                <th>Location</th>
+                <th>Total Costs</th>
+                <th>Breakdown Count</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in machine_costs %}
+            <tr>
+                <td>{{ item.machine.name }}</td>
+                <td>{{ item.machine.model or 'N/A' }}</td>
+                <td>{{ item.machine.location or 'N/A' }}</td>
+                <td>R{{ "%.2f"|format(item.total_cost) }}</td>
+                <td>{{ item.breakdown_count }}</td>
+                <td><span class="badge badge-{{ item.machine.status }}">{{ item.machine.status.upper() }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h2>Cost Analysis</h2>
+    <div style="margin-top: 1rem;">
+        <canvas id="costChart" width="400" height="200"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+    const ctx = document.getElementById('costChart').getContext('2d');
+    const costChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Maintenance Costs', 'Downtime Costs'],
+            datasets: [{
+                data: [{{ total_maintenance }}, {{ total_downtime }}],
+                backgroundColor: [
+                    '#3498db',
+                    '#e74c3c'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                },
+                title: {
+                    display: true,
+                    text: 'Cost Distribution'
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
