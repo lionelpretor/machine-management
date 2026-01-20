@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Log Breakdown - Machine Management System{% endblock %}
+
+{% block content %}
+<h1>Log New Breakdown</h1>
+
+<div class="card">
+    <form method="POST">
+        <div class="form-group">
+            <label for="machine_id">Machine *</label>
+            <select id="machine_id" name="machine_id" required>
+                <option value="">Select a machine</option>
+                {% for machine in machines %}
+                <option value="{{ machine.id }}">{{ machine.name }} - {{ machine.location or 'No location' }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="title">Issue Title *</label>
+            <input type="text" id="title" name="title" required placeholder="Brief description of the issue">
+        </div>
+        
+        <div class="form-group">
+            <label for="description">Detailed Description</label>
+            <textarea id="description" name="description" placeholder="Provide detailed information about the breakdown"></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="priority">Priority *</label>
+            <select id="priority" name="priority" required>
+                <option value="low">Low - Minor issue, can wait</option>
+                <option value="medium" selected>Medium - Should be addressed soon</option>
+                <option value="high">High - Significant impact</option>
+                <option value="critical">Critical - Machine completely down</option>
+            </select>
+        </div>
+        
+        <button type="submit" class="btn btn-danger">Log Breakdown</button>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

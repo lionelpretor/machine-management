@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}{{ machine.name }} - Machine Management System{% endblock %}
+
+{% block content %}
+<h1>{{ machine.name }}</h1>
+
+<div class="card">
+    <h2>Machine Details</h2>
+    <table>
+        <tr>
+            <th style="width: 200px;">Model</th>
+            <td>{{ machine.model or 'N/A' }}</td>
+        </tr>
+        <tr>
+            <th>Serial Number</th>
+            <td>{{ machine.serial_number or 'N/A' }}</td>
+        </tr>
+        <tr>
+            <th>Location</th>
+            <td>{{ machine.location or 'N/A' }}</td>
+        </tr>
+        <tr>
+            <th>Status</th>
+            <td><span class="badge badge-{{ machine.status }}">{{ machine.status.upper() }}</span></td>
+        </tr>
+        <tr>
+            <th>Purchase Date</th>
+            <td>{{ machine.purchase_date.strftime('%Y-%m-%d') if machine.purchase_date else 'N/A' }}</td>
+        </tr>
+        <tr>
+            <th>Purchase Cost</th>
+            <td>${{ "%.2f"|format(machine.purchase_cost) }}</td>
+        </tr>
+        <tr>
+            <th>Total Operating Costs</th>
+            <td>${{ "%.2f"|format(total_cost) }}</td>
+        </tr>
+    </table>
+</div>
+
+<div class="card">
+    <h2>Breakdown History</h2>
+    {% if breakdowns %}
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Reported By</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for breakdown in breakdowns %}
+            <tr>
+                <td>{{ breakdown.title }}</td>
+                <td><span class="badge badge-{{ breakdown.priority }}">{{ breakdown.priority.upper() }}</span></td>
+                <td><span class="badge badge-{{ breakdown.status.replace('_', '-') }}">{{ breakdown.status.replace('_', ' ').upper() }}</span></td>
+                <td>{{ breakdown.reporter.username }}</td>
+                <td>{{ breakdown.downtime_start.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ breakdown.downtime_end.strftime('%Y-%m-%d %H:%M') if breakdown.downtime_end else 'Ongoing' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No breakdowns recorded</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>Maintenance History</h2>
+    {% if maintenance_requests %}
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Est. Cost</th>
+                <th>Actual Cost</th>
+                <th>Scheduled</th>
+                <th>Completed</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for request in maintenance_requests %}
+            <tr>
+                <td>{{ request.title }}</td>
+                <td>{{ request.maintenance_type }}</td>
+                <td><span class="badge badge-{{ request.status }}">{{ request.status.upper() }}</span></td>
+                <td>${{ "%.2f"|format(request.estimated_cost) }}</td>
+                <td>${{ "%.2f"|format(request.actual_cost) }}</td>
+                <td>{{ request.scheduled_date.strftime('%Y-%m-%d') if request.scheduled_date else 'N/A' }}</td>
+                <td>{{ request.completed_date.strftime('%Y-%m-%d') if request.completed_date else 'N/A' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No maintenance recorded</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>Cost Breakdown</h2>
+    {% if costs %}
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cost in costs %}
+            <tr>
+                <td>{{ cost.date.strftime('%Y-%m-%d') }}</td>
+                <td>{{ cost.cost_type }}</td>
+                <td>${{ "%.2f"|format(cost.amount) }}</td>
+                <td>{{ cost.description or 'N/A' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No costs recorded</p>
+    {% endif %}
+</div>
+
+<a href="{{ url_for('machines') }}" class="btn btn-primary">Back to Machines</a>
+{% endblock %}

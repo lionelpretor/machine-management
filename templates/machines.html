@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Machines - Machine Management System{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h1>All Machines</h1>
+    {% if current_user.role in ['management', 'exco'] %}
+    <a href="{{ url_for('add_machine') }}" class="btn btn-success">Add Machine</a>
+    {% endif %}
+</div>
+
+<div class="card">
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Model</th>
+                <th>Serial Number</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Purchase Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for machine in machines %}
+            <tr>
+                <td>{{ machine.name }}</td>
+                <td>{{ machine.model or 'N/A' }}</td>
+                <td>{{ machine.serial_number or 'N/A' }}</td>
+                <td>{{ machine.location or 'N/A' }}</td>
+                <td><span class="badge badge-{{ machine.status }}">{{ machine.status.upper() }}</span></td>
+                <td>{{ machine.purchase_date.strftime('%Y-%m-%d') if machine.purchase_date else 'N/A' }}</td>
+                <td>
+                    <a href="{{ url_for('machine_detail', machine_id=machine.id) }}" class="btn btn-primary">View Details</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

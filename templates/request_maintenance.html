@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Request Maintenance - Machine Management System{% endblock %}
+
+{% block content %}
+<h1>Request Maintenance</h1>
+
+<div class="card">
+    <form method="POST">
+        <div class="form-group">
+            <label for="machine_id">Machine *</label>
+            <select id="machine_id" name="machine_id" required>
+                <option value="">Select a machine</option>
+                {% for machine in machines %}
+                <option value="{{ machine.id }}">{{ machine.name }} - {{ machine.location or 'No location' }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="title">Maintenance Title *</label>
+            <input type="text" id="title" name="title" required placeholder="Brief description of maintenance needed">
+        </div>
+        
+        <div class="form-group">
+            <label for="description">Detailed Description</label>
+            <textarea id="description" name="description" placeholder="Provide detailed information about the maintenance required"></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="maintenance_type">Maintenance Type *</label>
+            <select id="maintenance_type" name="maintenance_type" required>
+                <option value="preventive">Preventive - Scheduled regular maintenance</option>
+                <option value="corrective">Corrective - Fix existing issue</option>
+                <option value="emergency">Emergency - Urgent maintenance required</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="estimated_cost">Estimated Cost ($)</label>
+            <input type="number" id="estimated_cost" name="estimated_cost" step="0.01" value="0">
+        </div>
+        
+        <div class="form-group">
+            <label for="scheduled_date">Scheduled Date</label>
+            <input type="date" id="scheduled_date" name="scheduled_date">
+        </div>
+        
+        <button type="submit" class="btn btn-success">Submit Request</button>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-danger">Cancel</a>
+    </form>
+</div>
+{% endblock %}

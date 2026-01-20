@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Machine Management System{% endblock %}
+
+{% block content %}
+<h1>Dashboard</h1>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>{{ total_machines }}</h3>
+        <p>Total Machines</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ machines_down }}</h3>
+        <p>Machines Down</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ open_breakdowns }}</h3>
+        <p>Open Breakdowns</p>
+    </div>
+    <div class="stat-card">
+        <h3>${{ "%.2f"|format(total_maintenance_cost + total_downtime_cost) }}</h3>
+        <p>Total Costs</p>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Active Breakdowns (Priority Order)</h2>
+    {% if breakdowns %}
+    <table>
+        <thead>
+            <tr>
+                <th>Machine</th>
+                <th>Title</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Reported</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for breakdown in breakdowns %}
+            <tr>
+                <td>{{ breakdown.machine.name }}</td>
+                <td>{{ breakdown.title }}</td>
+                <td><span class="badge badge-{{ breakdown.priority }}">{{ breakdown.priority.upper() }}</span></td>
+                <td><span class="badge badge-{{ breakdown.status.replace('_', '-') }}">{{ breakdown.status.replace('_', ' ').upper() }}</span></td>
+                <td>{{ breakdown.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>
+                    {% if current_user.role in ['maintenance', 'management', 'exco'] %}
+                    <form method="POST" action="{{ url_for('update_breakdown', breakdown_id=breakdown.id) }}" style="display: inline;">
+                        <select name="status" onchange="this.form.submit()" class="btn btn-primary">
+                            <option value="">Update Status</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="resolved">Resolved</option>
+                        </select>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No active breakdowns</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>Pending Maintenance Requests</h2>
+    {% if pending_maintenance %}
+    <table>
+        <thead>
+            <tr>
+                <th>Machine</th>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Est. Cost</th>
+                <th>Requested</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for request in pending_maintenance %}
+            <tr>
+                <td>{{ request.machine.name }}</td>
+                <td>{{ request.title }}</td>
+                <td>{{ request.maintenance_type }}</td>
+                <td>${{ "%.2f"|format(request.estimated_cost) }}</td>
+                <td>{{ request.created_at.strftime('%Y-%m-%d') }}</td>
+                <td>
+                    {% if current_user.role in ['maintenance', 'management'] %}
+                    <a href="{{ url_for('upload_quote', request_id=request.id) }}" class="btn btn-primary">Upload Quote</a>
+                    {% endif %}
+                    {% if current_user.role in ['management', 'exco'] %}
+                    <form method="POST" action="{{ url_for('update_maintenance', request_id=request.id) }}" style="display: inline;">
+                        <input type="hidden" name="status" value="approved">
+                        <button type="submit" class="btn btn-success">Approve</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('update_maintenance', request_id=request.id) }}" style="display: inline;">
+                        <input type="hidden" name="status" value="rejected">
+                        <button type="submit" class="btn btn-danger">Reject</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No pending maintenance requests</p>
+    {% endif %}
+</div>
+
+{% if current_user.role in ['management', 'exco'] %}
+<div class="card">
+    <h2>Pending Quote Approvals</h2>
+    {% if pending_quotes %}
+    <table>
+        <thead>
+            <tr>
+                <th>Maintenance Request</th>
+                <th>Vendor</th>
+                <th>Amount</th>
+                <th>Uploaded By</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for quote in pending_quotes %}
+            <tr>
+                <td>{{ quote.maintenance_request.title }}</td>
+                <td>{{ quote.vendor }}</td>
+                <td>${{ "%.2f"|format(quote.amount) }}</td>
+                <td>{{ quote.uploader.username }}</td>
+                <td>{{ quote.created_at.strftime('%Y-%m-%d') }}</td>
+                <td>
+                    <a href="{{ url_for('uploaded_file', filename=quote.filename) }}" class="btn btn-primary" target="_blank">View</a>
+                    <form method="POST" action="{{ url_for('approve_quote', quote_id=quote.id) }}" style="display: inline;">
+                        <input type="hidden" name="action" value="approve">
+                        <button type="submit" class="btn btn-success">Approve</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('approve_quote', quote_id=quote.id) }}" style="display: inline;">
+                        <input type="hidden" name="action" value="reject">
+                        <button type="submit" class="btn btn-danger">Reject</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No pending quotes</p>
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="card">
+    <h2>Machine Status Overview</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Machine</th>
+                <th>Model</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for machine in machines %}
+            <tr>
+                <td>{{ machine.name }}</td>
+                <td>{{ machine.model or 'N/A' }}</td>
+                <td>{{ machine.location or 'N/A' }}</td>
+                <td>
+                    <span class="badge badge-{{ machine.status }}">{{ machine.status.upper() }}</span>
+                </td>
+                <td>
+                    <a href="{{ url_for('machine_detail', machine_id=machine.id) }}" class="btn btn-primary">View Details</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

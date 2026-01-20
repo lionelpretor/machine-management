@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Machine Management System{% endblock %}
+
+{% block content %}
+<style>
+    .login-container {
+        max-width: 400px;
+        margin: 5rem auto;
+    }
+    
+    .login-card {
+        background: white;
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .login-card h2 {
+        text-align: center;
+        margin-bottom: 2rem;
+        color: #2c3e50;
+    }
+</style>
+
+<div class="login-container">
+    <div class="login-card">
+        <h2>Machine Management System</h2>
+        <form method="POST">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+        </form>
+        
+        <div style="margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;">
+            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;"><strong>Default Users:</strong></p>
+            <p style="font-size: 0.85rem; margin: 0.25rem 0;">admin/password123 (EXCO)</p>
+            <p style="font-size: 0.85rem; margin: 0.25rem 0;">manager/password123 (Management)</p>
+            <p style="font-size: 0.85rem; margin: 0.25rem 0;">operator/password123 (Operator)</p>
+            <p style="font-size: 0.85rem; margin: 0.25rem 0;">maintenance/password123 (Maintenance)</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
