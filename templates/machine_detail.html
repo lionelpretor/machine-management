@@ -30,11 +30,11 @@
         </tr>
         <tr>
             <th>Purchase Cost</th>
-            <td>${{ "%.2f"|format(machine.purchase_cost) }}</td>
+            <td>R{{ "%.2f"|format(machine.purchase_cost) }}</td>
         </tr>
         <tr>
             <th>Total Operating Costs</th>
-            <td>${{ "%.2f"|format(total_cost) }}</td>
+            <td>R{{ "%.2f"|format(total_cost) }}</td>
         </tr>
     </table>
 </div>
@@ -92,8 +92,8 @@
                 <td>{{ request.title }}</td>
                 <td>{{ request.maintenance_type }}</td>
                 <td><span class="badge badge-{{ request.status }}">{{ request.status.upper() }}</span></td>
-                <td>${{ "%.2f"|format(request.estimated_cost) }}</td>
-                <td>${{ "%.2f"|format(request.actual_cost) }}</td>
+                <td>R{{ "%.2f"|format(request.estimated_cost) }}</td>
+                <td>R{{ "%.2f"|format(request.actual_cost) }}</td>
                 <td>{{ request.scheduled_date.strftime('%Y-%m-%d') if request.scheduled_date else 'N/A' }}</td>
                 <td>{{ request.completed_date.strftime('%Y-%m-%d') if request.completed_date else 'N/A' }}</td>
             </tr>
@@ -122,7 +122,7 @@
             <tr>
                 <td>{{ cost.date.strftime('%Y-%m-%d') }}</td>
                 <td>{{ cost.cost_type }}</td>
-                <td>${{ "%.2f"|format(cost.amount) }}</td>
+                <td>R{{ "%.2f"|format(cost.amount) }}</td>
                 <td>{{ cost.description or 'N/A' }}</td>
             </tr>
             {% endfor %}

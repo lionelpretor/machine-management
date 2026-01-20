@@ -10,7 +10,7 @@
     <p><strong>Machine:</strong> {{ maintenance_request.machine.name }}</p>
     <p><strong>Type:</strong> {{ maintenance_request.maintenance_type }}</p>
     <p><strong>Description:</strong> {{ maintenance_request.description }}</p>
-    <p><strong>Estimated Cost:</strong> ${{ "%.2f"|format(maintenance_request.estimated_cost) }}</p>
+    <p><strong>Estimated Cost:</strong> R{{ "%.2f"|format(maintenance_request.estimated_cost) }}</p>
 </div>
 
 <div class="card">
@@ -21,7 +21,7 @@
         </div>
         
         <div class="form-group">
-            <label for="amount">Quote Amount ($) *</label>
+            <label for="amount">Quote Amount (R) *</label>
             <input type="number" id="amount" name="amount" step="0.01" required>
         </div>
         

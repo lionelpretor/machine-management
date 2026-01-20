@@ -278,7 +278,7 @@ def update_breakdown(breakdown_id):
             # Calculate downtime cost if applicable
             if breakdown.downtime_start and breakdown.downtime_end:
                 hours_down = (breakdown.downtime_end - breakdown.downtime_start).total_seconds() / 3600
-                downtime_cost = hours_down * 100  # $100 per hour example rate
+                downtime_cost = hours_down * 1000  # R1000 per hour example rate
                 
                 cost_entry = CostEntry(
                     machine_id=breakdown.machine_id,

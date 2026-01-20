@@ -7,15 +7,15 @@
 
 <div class="stats-grid">
     <div class="stat-card">
-        <h3>${{ "%.2f"|format(total_maintenance) }}</h3>
+        <h3>R{{ "%.2f"|format(total_maintenance) }}</h3>
         <p>Total Maintenance Costs</p>
     </div>
     <div class="stat-card">
-        <h3>${{ "%.2f"|format(total_downtime) }}</h3>
+        <h3>R{{ "%.2f"|format(total_downtime) }}</h3>
         <p>Total Downtime Costs</p>
     </div>
     <div class="stat-card">
-        <h3>${{ "%.2f"|format(total_costs) }}</h3>
+        <h3>R{{ "%.2f"|format(total_costs) }}</h3>
         <p>Total Operating Costs</p>
     </div>
 </div>
@@ -39,7 +39,7 @@
                 <td>{{ item.machine.name }}</td>
                 <td>{{ item.machine.model or 'N/A' }}</td>
                 <td>{{ item.machine.location or 'N/A' }}</td>
-                <td>${{ "%.2f"|format(item.total_cost) }}</td>
+                <td>R{{ "%.2f"|format(item.total_cost) }}</td>
                 <td>{{ item.breakdown_count }}</td>
                 <td><span class="badge badge-{{ item.machine.status }}">{{ item.machine.status.upper() }}</span></td>
             </tr>

@@ -19,7 +19,7 @@
         <p>Open Breakdowns</p>
     </div>
     <div class="stat-card">
-        <h3>${{ "%.2f"|format(total_maintenance_cost + total_downtime_cost) }}</h3>
+        <h3>R{{ "%.2f"|format(total_maintenance_cost + total_downtime_cost) }}</h3>
         <p>Total Costs</p>
     </div>
 </div>
@@ -86,7 +86,7 @@
                 <td>{{ request.machine.name }}</td>
                 <td>{{ request.title }}</td>
                 <td>{{ request.maintenance_type }}</td>
-                <td>${{ "%.2f"|format(request.estimated_cost) }}</td>
+                <td>R{{ "%.2f"|format(request.estimated_cost) }}</td>
                 <td>{{ request.created_at.strftime('%Y-%m-%d') }}</td>
                 <td>
                     {% if current_user.role in ['maintenance', 'management'] %}
@@ -132,7 +132,7 @@
             <tr>
                 <td>{{ quote.maintenance_request.title }}</td>
                 <td>{{ quote.vendor }}</td>
-                <td>${{ "%.2f"|format(quote.amount) }}</td>
+                <td>R{{ "%.2f"|format(quote.amount) }}</td>
                 <td>{{ quote.uploader.username }}</td>
                 <td>{{ quote.created_at.strftime('%Y-%m-%d') }}</td>
                 <td>

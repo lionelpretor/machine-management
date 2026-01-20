@@ -164,7 +164,7 @@ The application provides the following routes:
 ### Downtime Costs
 Automatically calculated when a breakdown is resolved:
 - Duration = Downtime End - Downtime Start
-- Cost = Duration (hours) × $100/hour
+- Cost = Duration (hours) × R1000/hour
 
 ### Maintenance Costs
 Recorded when maintenance is completed with actual cost entered
