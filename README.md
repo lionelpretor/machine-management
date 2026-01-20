@@ -69,7 +69,7 @@ python app.py
 ```
 
 4. Access the application:
-Open your web browser and navigate to: `http://localhost:5000`
+Open your web browser and navigate to: `http://localhost:5001`
 
 ## Default Users
 

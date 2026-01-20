@@ -192,18 +192,28 @@ def add_machine():
         return redirect(url_for('dashboard'))
     
     if request.method == 'POST':
-        machine = Machine(
-            name=request.form.get('name'),
-            model=request.form.get('model'),
-            serial_number=request.form.get('serial_number'),
-            location=request.form.get('location'),
-            purchase_date=datetime.strptime(request.form.get('purchase_date'), '%Y-%m-%d').date() if request.form.get('purchase_date') else None,
-            purchase_cost=float(request.form.get('purchase_cost', 0))
-        )
-        db.session.add(machine)
-        db.session.commit()
-        flash('Machine added successfully', 'success')
-        return redirect(url_for('machines'))
+        try:
+            purchase_date = None
+            if request.form.get('purchase_date'):
+                purchase_date = datetime.strptime(request.form.get('purchase_date'), '%Y-%m-%d').date()
+            
+            purchase_cost = float(request.form.get('purchase_cost', 0))
+            
+            machine = Machine(
+                name=request.form.get('name'),
+                model=request.form.get('model'),
+                serial_number=request.form.get('serial_number'),
+                location=request.form.get('location'),
+                purchase_date=purchase_date,
+                purchase_cost=purchase_cost
+            )
+            db.session.add(machine)
+            db.session.commit()
+            flash('Machine added successfully', 'success')
+            return redirect(url_for('machines'))
+        except ValueError as e:
+            flash('Invalid date or cost format', 'error')
+            return redirect(request.url)
     
     return render_template('add_machine.html')
 
@@ -292,19 +302,29 @@ def update_breakdown(breakdown_id):
 @login_required
 def request_maintenance():
     if request.method == 'POST':
-        maintenance_request = MaintenanceRequest(
-            machine_id=request.form.get('machine_id'),
-            requested_by=current_user.id,
-            title=request.form.get('title'),
-            description=request.form.get('description'),
-            maintenance_type=request.form.get('maintenance_type'),
-            estimated_cost=float(request.form.get('estimated_cost', 0)),
-            scheduled_date=datetime.strptime(request.form.get('scheduled_date'), '%Y-%m-%d').date() if request.form.get('scheduled_date') else None
-        )
-        db.session.add(maintenance_request)
-        db.session.commit()
-        flash('Maintenance request submitted successfully', 'success')
-        return redirect(url_for('dashboard'))
+        try:
+            scheduled_date = None
+            if request.form.get('scheduled_date'):
+                scheduled_date = datetime.strptime(request.form.get('scheduled_date'), '%Y-%m-%d').date()
+            
+            estimated_cost = float(request.form.get('estimated_cost', 0))
+            
+            maintenance_request = MaintenanceRequest(
+                machine_id=request.form.get('machine_id'),
+                requested_by=current_user.id,
+                title=request.form.get('title'),
+                description=request.form.get('description'),
+                maintenance_type=request.form.get('maintenance_type'),
+                estimated_cost=estimated_cost,
+                scheduled_date=scheduled_date
+            )
+            db.session.add(maintenance_request)
+            db.session.commit()
+            flash('Maintenance request submitted successfully', 'success')
+            return redirect(url_for('dashboard'))
+        except ValueError:
+            flash('Invalid date or cost format', 'error')
+            return redirect(request.url)
     
     machines = Machine.query.all()
     return render_template('request_maintenance.html', machines=machines)
@@ -328,17 +348,22 @@ def update_maintenance(request_id):
                 machine.status = 'maintenance'
         elif status == 'completed':
             maintenance_request.completed_date = datetime.utcnow().date()
-            actual_cost = request.form.get('actual_cost')
-            if actual_cost:
-                maintenance_request.actual_cost = float(actual_cost)
-                cost_entry = CostEntry(
-                    machine_id=maintenance_request.machine_id,
-                    cost_type='maintenance',
-                    amount=float(actual_cost),
-                    description=f'Maintenance: {maintenance_request.title}',
-                    maintenance_request_id=request_id
-                )
-                db.session.add(cost_entry)
+            actual_cost_str = request.form.get('actual_cost')
+            if actual_cost_str:
+                try:
+                    actual_cost = float(actual_cost_str)
+                    maintenance_request.actual_cost = actual_cost
+                    cost_entry = CostEntry(
+                        machine_id=maintenance_request.machine_id,
+                        cost_type='maintenance',
+                        amount=actual_cost,
+                        description=f'Maintenance: {maintenance_request.title}',
+                        maintenance_request_id=request_id
+                    )
+                    db.session.add(cost_entry)
+                except ValueError:
+                    flash('Invalid cost value', 'error')
+                    return redirect(url_for('dashboard'))
             
             machine = Machine.query.get(maintenance_request.machine_id)
             if machine:
@@ -369,16 +394,31 @@ def upload_quote(request_id):
         
         if file:
             filename = secure_filename(file.filename)
+            
+            # Validate file extension
+            allowed_extensions = {'.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'}
+            file_ext = os.path.splitext(filename)[1].lower()
+            if file_ext not in allowed_extensions:
+                flash('Invalid file type. Allowed: PDF, Word, Images', 'error')
+                return redirect(request.url)
+            
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
             filename = f"{timestamp}_{filename}"
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
             
+            try:
+                amount = float(request.form.get('amount', 0))
+            except ValueError:
+                flash('Invalid amount value', 'error')
+                os.remove(filepath)  # Clean up uploaded file
+                return redirect(request.url)
+            
             quote = Quote(
                 maintenance_request_id=request_id,
                 uploaded_by=current_user.id,
                 filename=filename,
-                amount=float(request.form.get('amount', 0)),
+                amount=amount,
                 vendor=request.form.get('vendor')
             )
             db.session.add(quote)
@@ -412,6 +452,13 @@ def approve_quote(quote_id):
 @app.route('/uploads/<filename>')
 @login_required
 def uploaded_file(filename):
+    # Validate filename to prevent path traversal
+    filename = secure_filename(filename)
+    # Verify file exists in quotes table to ensure authorized access
+    quote = Quote.query.filter_by(filename=filename).first()
+    if not quote:
+        flash('File not found', 'error')
+        return redirect(url_for('dashboard'))
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 @app.route('/reports')
@@ -470,4 +517,6 @@ def init_db():
 
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    # Debug mode should be disabled in production
+    debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    app.run(debug=debug_mode, host='0.0.0.0', port=5001)
